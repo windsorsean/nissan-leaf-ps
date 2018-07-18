@@ -34,7 +34,7 @@ Cmdlet will return an object with the following properties:
 - Charging
 - InsideTemp
 - LastUpdate
-- Location (only if locatation option used)
+- Location (only if location option used)
   - Updated
   - Latitude
   - Longitude
