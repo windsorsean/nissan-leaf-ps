@@ -34,8 +34,12 @@ Cmdlet will return an object with the following properties:
 - Charging
 - InsideTemp
 - LastUpdate
+- Location (only if locatation option used)
+  - Updated
+  - Latitude
+  - Longitude
+  - Link
 
-If location requested, Latitude and Longitude properties will be added.
 
 ## Acknowledgements
 Thanks to [Ben Woodford](https://gist.github.com/BenWoodford) for his initial documentation of the NissanConnect APIs.
