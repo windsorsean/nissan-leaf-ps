@@ -1,5 +1,8 @@
 ﻿<#
     Original code by Sean Hart (@seanhart) - 2018-06-14
+    [2018-08-27] Updates:
+        - Pass car object to functions instead of global variable.
+        - Bug with -update resolved.
     [2018-07-17] Updates:
         - Change code to use functions
         - Location; object returned has a Location property with an object instead of lat/long properties.
@@ -90,8 +93,8 @@ function Connect-Nissan {
 
 
 # Request a refresh from the car
-function Update-Leaf {
-    $data = Invoke-RestMethod -Uri ($baseUrl + 'battery/vehicles/' + $cardata.VIN + '/getChargingStatusRequest') -Method Get -Headers $header -WebSession $mysession -ContentType 'application/json'
+function Update-Leaf($car) {
+    $data = Invoke-RestMethod -Uri ($baseUrl + 'battery/vehicles/' + $car.VIN + '/getChargingStatusRequest') -Method Get -Headers $header -WebSession $mysession -ContentType 'application/json'
     if ($data.batteryRecords -ne $null) {
         $car.BatteryCharge = $data.batteryRecords.batteryStatus.soc.value
         $car.RangeClimateOn = ($data.batteryRecords.cruisingRangeAcOn / 1000)
@@ -110,7 +113,7 @@ function Update-Leaf {
 
 
 # Turn on climate control
-function Send-LeafClimateOn {
+function Send-LeafClimateOn($car) {
     $payload = @{
         'executionTime' = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
       }
@@ -120,7 +123,7 @@ function Send-LeafClimateOn {
         $payload['preACunit'] = 'C'
     }
 
-    $data = Invoke-RestMethod -Uri ($baseUrl + 'hvac/vehicles/' + $cardata.VIN + '/activateHVAC') -Method POST -Headers $header -Body ($payload | ConvertTo-Json) -WebSession $mysession -ContentType 'application/json'
+    $data = Invoke-RestMethod -Uri ($baseUrl + 'hvac/vehicles/' + $car.VIN + '/activateHVAC') -Method POST -Headers $header -Body ($payload | ConvertTo-Json) -WebSession $mysession -ContentType 'application/json'
     if ($data.messageDeliveryStatus -eq 'Success') {
         Return ($true)
     } else {
@@ -133,12 +136,12 @@ function Send-LeafClimateOn {
 
 
 # Turn off climate control
-function Send-LeafClimateOff {
+function Send-LeafClimateOff($car) {
     $payload = @{
         'executionTime' = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
       }
 
-    $data = Invoke-RestMethod -Uri ($baseUrl + 'hvac/vehicles/' + $cardata.VIN + '/deactivateHVAC') -Method POST -Headers $header -Body ($payload | ConvertTo-Json) -WebSession $mysession -ContentType 'application/json'
+    $data = Invoke-RestMethod -Uri ($baseUrl + 'hvac/vehicles/' + $car.VIN + '/deactivateHVAC') -Method POST -Headers $header -Body ($payload | ConvertTo-Json) -WebSession $mysession -ContentType 'application/json'
     if ($data.messageDeliveryStatus -eq 'Success') {
         Return ($true)
     } else {
@@ -150,12 +153,12 @@ function Send-LeafClimateOff {
 
 
 # Start charge
-function Send-LeafChargeStart {
+function Send-LeafChargeStart($car) {
     $payload = @{
         'executionTime' = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
       }
 
-    $data = Invoke-RestMethod -Uri ($baseUrl + 'battery/vehicles/' + $cardata.VIN + '/remoteChargingRequest') -Method POST -Headers $header -Body ($payload | ConvertTo-Json) -WebSession $mysession -ContentType 'application/json'
+    $data = Invoke-RestMethod -Uri ($baseUrl + 'battery/vehicles/' + $car.VIN + '/remoteChargingRequest') -Method POST -Headers $header -Body ($payload | ConvertTo-Json) -WebSession $mysession -ContentType 'application/json'
     if ($data.messageDeliveryStatus -eq 'Success') {
         Return ($true)
     } else {
@@ -167,14 +170,14 @@ function Send-LeafChargeStart {
 
 
 # Location refresh
-function Update-LeafLocation {
+function Update-LeafLocation($car) {
     $payload = @{
         'searchPeriod' = (Get-Date -Month ((Get-Date).Month - 1)).ToString("yyyyMMdd") + "," + (Get-Date).ToString("yyyyMMdd");
         'acquiredDataUpperLimit' = '1';
         'serviceName' = 'MyCarFinderResult'
       }
 
-    $data = Invoke-RestMethod -Uri ($baseUrl + 'vehicleLocator/vehicles/' + $cardata.VIN + '/refreshVehicleLocator') -Method POST -Headers $header -Body ($payload | ConvertTo-Json) -WebSession $mysession -ContentType 'application/json'
+    $data = Invoke-RestMethod -Uri ($baseUrl + 'vehicleLocator/vehicles/' + $car.VIN + '/refreshVehicleLocator') -Method POST -Headers $header -Body ($payload | ConvertTo-Json) -WebSession $mysession -ContentType 'application/json'
     if ($data.sandsNotificationEvent -ne $null) {
         $location = [PSCustomObject]@{
             'Updated' = Get-Date $data.sandsNotificationEvent.sandsNotificationEvent.head.receivedDate;
@@ -194,14 +197,14 @@ function Update-LeafLocation {
 
 
 # Get last location
-function Get-LeafLocation {
+function Get-LeafLocation($car) {
     $payload = @{
         'searchPeriod' = (Get-Date -Month ((Get-Date).Month - 1)).ToString("yyyyMMdd") + "," + (Get-Date).ToString("yyyyMMdd");
         'acquiredDataUpperLimit' = '1';
         'serviceName' = 'MyCarFinderResult'
       }
 
-    $data = Invoke-RestMethod -Uri ($baseUrl + 'vehicleLocator/vehicles/' + $cardata.VIN + '/getNotificationHistory') -Method POST -Headers $header -Body ($payload | ConvertTo-Json) -WebSession $mysession -ContentType 'application/json'
+    $data = Invoke-RestMethod -Uri ($baseUrl + 'vehicleLocator/vehicles/' + $car.VIN + '/getNotificationHistory') -Method POST -Headers $header -Body ($payload | ConvertTo-Json) -WebSession $mysession -ContentType 'application/json'
     if ($data.sandsNotificationEvent -ne $null) {
         $location = [PSCustomObject]@{
             'Updated' = Get-Date $data.sandsNotificationEvent.sandsNotificationEvent.head.receivedDate;
@@ -243,7 +246,7 @@ if ($update) {
 
     # If we don't get updated data in the first request, wait 5 seconds and re-connect
     $LastUpdate = $cardata.LastUpdate
-    $cardata = Update-Leaf($cardata.VIN)
+    $cardata = Update-Leaf($cardata)
     if ($LastUpdate -eq $cardata.LastUpdate) {
         Start-Sleep -Seconds 5
         $cardata = $null
@@ -256,25 +259,25 @@ if ($update) {
 # Process climate on
 if ($climate_on -and (-not $climate_off)) {
     Write-Host "`nSending climate on request..."
-    if (Send-LeafClimateOn) { Write-Host "`nClimate on request sent successfully." }
+    if (Send-LeafClimateOn($cardata)) { Write-Host "`nClimate on request sent successfully." }
 }
 
 # Process climate off
 if ($climate_off -and (-not $climate_on)) {
     Write-Host "`nSending climate off request..."
-    if (Send-LeafClimateOff) { Write-Host "`nClimate off request sent successfully." }
+    if (Send-LeafClimateOff($cardata)) { Write-Host "`nClimate off request sent successfully." }
 }
 
 # Process charge on
 if ($charge_on) {
     Write-Host "`nSending charge start request..."
-    if (Send-LeafChargeStart) { Write-Host "`nStart charge request sent successfully." }
+    if (Send-LeafChargeStart($cardata)) { Write-Host "`nStart charge request sent successfully." }
 }
 
 # Process last location
 if ($last_location) {
     Write-Host "`nRequesting last location..."
-    $loc = Get-LeafLocation
+    $loc = Get-LeafLocation($cardata)
     if ($loc.errorCode -eq $null) {
         $cardata | Add-Member -MemberType NoteProperty -Name Location -Value $loc
         Write-Host 'Location data:' -NoNewline
@@ -286,7 +289,7 @@ if ($last_location) {
 # Process location refresh
 if ($locate) {
     Write-Host "`nRequesting location update..."
-    $loc = Update-LeafLocation
+    $loc = Update-LeafLocation($cardata)
     if ($loc.errorCode -eq $null) {
         $cardata | Add-Member -MemberType NoteProperty -Name Location -Value $loc
         Write-Host 'Location data:' -NoNewline
@@ -294,7 +297,7 @@ if ($locate) {
         if (-not $no_map) { Start-Process $loc.Link }
     } else {
         Write-Host "`nUnable to refresh location, getting last known location..."
-        $loc = Get-LeafLocation
+        $loc = Get-LeafLocation($cardata)
         if ($loc.errorCode -eq $null) {
             $cardata | Add-Member -MemberType NoteProperty -Name Location -Value $loc
             Write-Host 'Location data:' -NoNewline
