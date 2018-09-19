@@ -10,6 +10,7 @@ PowerShell cmdlet for the Nissan Leaf using NissanConnect EV APIs.
 ```
 -username       : NissanConnect username [string]
 -password       : NissanConnect password [string]
+-country        : CA / US (CA is default) [string]
 -update         : Refresh data [switch]
 -climate_on     : Turn climate control on [switch]
 -set_temp       : Set temperature for climate control (optional but requires -climate_on) [int]
