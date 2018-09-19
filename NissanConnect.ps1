@@ -1,5 +1,8 @@
 ﻿<#
     Original code by Sean Hart (@seanhart) - 2018-06-14
+    [2018-09-19] Updates:
+        - Added param to set country (defaults to 'CA' for Canada, 'US' can also be used.)
+        - Changed language field from "en_CA" to "en_US" for no particular reason.
     [2018-08-27] Updates:
         - Pass car object to functions instead of global variable.
         - Bug with -update resolved.
@@ -13,6 +16,7 @@
 param (
     [string]$username = $( Read-Host "Input username"),
     [string]$password = $( Read-Host "Input password" ),
+    [string][ValidateSet("CA","US")]$country = "CA",  #Other country codes may work here?
     [switch]$update = $false,
     [switch]$climate_on = $false,
     [int]$set_temp = 0,
@@ -32,6 +36,8 @@ function Show-Usage {
 	    Write-Host " [required]" -ForegroundColor darkgray
     Write-Host "  -password <password>" -nonewline
 	    Write-Host " [required]" -ForegroundColor darkgray
+    Write-Host "  -country <CA/US>" -nonewline
+	    Write-Host " ['CA' for Canada (default), 'US' for United States]" -ForegroundColor darkgray
     Write-Host "  -update" -nonewline
 	    Write-Host " [use to refresh data]" -ForegroundColor darkgray
     Write-Host "  -climate_on" -nonewline
@@ -56,8 +62,8 @@ function Connect-Nissan {
     $payload = @{
         'authenticate' = @{
           'brand-s'= 'N';
-          'country'= 'CA';
-          'language-s'= 'en_CA';
+          'country'= $country;
+          'language-s'= 'en_US';
           'userid' = $username;
           'password' = $password
         }
