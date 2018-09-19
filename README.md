@@ -3,7 +3,7 @@ PowerShell cmdlet for the Nissan Leaf using NissanConnect EV APIs.
 
 ## Usage
 ```
-.\NissanConnect.ps1 -username <NissanConnect username> -password <password> -update -climate_on -set_temp <integer in C> -climate_off -charge_on -locate -last_location -no_map
+.\NissanConnect.ps1 -username <NissanConnect username> -password <password> -country CA|US -update -climate_on -set_temp <integer in C> -climate_off -charge_on -locate -last_location -no_map
 ```
 
 ## Parameters
