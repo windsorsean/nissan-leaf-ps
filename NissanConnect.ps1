@@ -1,5 +1,9 @@
 ﻿<#
     Original code by Sean Hart (@seanhart) - 2018-06-14
+    [2018-10-30] Updates:
+        - Added ability to request door lock/unlock.
+        - Added AccountID to properties (needed for door lock/unlock).
+        - Some code tidying (I'm still learning how functions work in PowerShell).
     [2018-09-19] Updates:
         - Added param to set country (defaults to 'CA' for Canada, 'US' can also be used.)
         - Changed language field from "en_CA" to "en_US" for no particular reason.
