@@ -3,7 +3,7 @@ PowerShell cmdlet for the Nissan Leaf using NissanConnect EV APIs.
 
 ## Usage
 ```
-.\NissanConnect.ps1 -username <NissanConnect username> -password <password> -country <CA|US> -update -climate_on -set_temp <integer in C> -climate_off -charge_on -locate -last_location -no_map
+.\NissanConnect.ps1 -username <NissanConnect username> -password <password> -country <CA|US> -update -climate_on -set_temp <integer in C> -climate_off -charge_on -locate -last_location -no_map -door_lock -door_unlock -pin_code
 ```
 
 ## Parameters
@@ -19,6 +19,9 @@ PowerShell cmdlet for the Nissan Leaf using NissanConnect EV APIs.
 -locate         : Request location refresh [switch]
 -last_location  : Get last recorded location [switch]
 -no_map         : Do not open Google Maps on location request [switch]
+-door_lock      : Request door lock (requires -pin_code) [switch]
+-door_unlock    : Request door unlock (requires -pin_code) [switch]
+-pin_code       : 4 digit pin code for door lock/unlock [string]
 ```
 
 ## Notes
