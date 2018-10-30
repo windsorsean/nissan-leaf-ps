@@ -28,6 +28,7 @@ PowerShell cmdlet for the Nissan Leaf using NissanConnect EV APIs.
 **-climate_on** and **-climate_off** cannot be used at the same time (no action will be taken). **-locate** or **-last_location** will result in the default browser opening Google Maps to the location unless **-no_map** is specified. **-set_temp** is not required, however if used it only applies to **-climate_on**.
 
 Cmdlet will return an object with the following properties:
+- Account ID
 - VIN
 - Year
 - Nickname
