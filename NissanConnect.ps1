@@ -1,5 +1,7 @@
 ﻿<#
     Original code by Sean Hart (@seanhart) - 2018-06-14
+    [2021-04-15] Updates:
+        - Fix door unlock endpoint.
     [2018-10-30] Updates:
         - Added ability to request door lock/unlock.
         - Added AccountID to properties (needed for door lock/unlock).
@@ -277,7 +279,7 @@ function Send-DoorUnLock($car, $pinCode) {
       }
 
     try {
-        $data = Invoke-RestMethod -Uri ($baseUrl + 'remote/vehicles/' + $car.VIN + '/accounts/' + $car.AccountID + '/rdl/createRDUL') -Method POST -Headers $header -Body ($payload | ConvertTo-Json) -WebSession $mysession -ContentType 'application/json'
+        $data = Invoke-RestMethod -Uri ($baseUrl + 'remote/vehicles/' + $car.VIN + '/accounts/' + $car.AccountID + '/rdul/createRDUL') -Method POST -Headers $header -Body ($payload | ConvertTo-Json) -WebSession $mysession -ContentType 'application/json'
         if ($data.messageDeliveryStatus -eq 'Success') {
             return $true
         } else {
